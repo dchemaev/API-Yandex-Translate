@@ -82,18 +82,25 @@ def handle_dialog(res, req):
             ]
             return
         else:
-            sessionStorage[user_id]['tft'] = tft
-            ttext = sessionStorage[user_id]["tft"]
-            res['response']['text'] = f'{translate(ttext)}'
+            if len(tft) == 1:
+                sessionStorage[user_id]['tft'] = tft[0]
+                ttext = sessionStorage[user_id]["tft"]
+                llang = "ru-en"
+                res['response']['text'] = f'{translate(ttext, llang)}'
+            else:
+                sessionStorage[user_id]['tft'] = tft[0]
+                sessionStorage[user_id]['lang'] = tft[1]
+                ttext = sessionStorage[user_id]["tft"]
+                llang = sessionStorage[user_id]["lang"]
+                res['response']['text'] = f'{translate(ttext, llang)}'
 
 
-def translate(text) -> "Перевод текста":
+def translate(text, llang) -> "Перевод текста":
     url = "https://translate.yandex.net/api/v1.5/tr.json/translate"
-
     params = {
         "key": "trnsl.1.1.20190416T140835Z.08c28d20c7acdc1f.0cd411bb3df4733f9798dcdb262b93f64b5f3225",
         "text": text,
-        "lang": "ru-en",
+        "lang": llang,
         "format": "plain"
     }
 
@@ -106,6 +113,8 @@ def get_text(req) -> "Получение текста для перевода":
     text = []
     for word in req['request']['nlu']['tokens']:
         text.append(word)
+    if len(text) == 4:
+        return text[2], text[3]
     if len(text) == 3:
         return text[2]
     else:
