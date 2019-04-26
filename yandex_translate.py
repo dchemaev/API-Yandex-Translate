@@ -53,27 +53,25 @@ def handle_dialog(res, req):
             return
         else:
             sessionStorage[user_id]['first_name'] = first_name
-            # создаём пустой массив, в который будем записывать города, которые пользователь уже отгадал
             res['response'][
                 'text'] = f'Приятно познакомиться, {first_name.title()}, шучу, мне плевать как тебя зовут.' \
-                f' Я буду называть тебя оболтусом'
-
-            res['response'][
-                'text'] = 'Здарова, оболтус!' \
-                          ' Пиши сюда свой текст и я его переведу,' \
+                f' Я буду называть тебя Жорик. Пиши сюда свой текст и я его переведу,' \
                           ' а потом позвоню твоей маме и расскажу, что ты не учишь английский!!!'
-        tft = get_text(req)
-        if tft is None:
-            res['response']['text'] = 'Не расслышала текст. Повтори, пожалуйста!'
-            res['response']['buttons'] = [
-                {
-                    'title': 'Помощь',
-                    'hide': True
-                }
-            ]
             return
+    tft = get_text(req)
+    if tft is None:
+        res['response']['text'] = 'Не расслышала текст. Повтори, пожалуйста!'
+        res['response']['buttons'] = [
+            {
+                'title': 'Помощь',
+                'hide': True
+            }
+        ]
+        return
+    else:
         sessionStorage[user_id]['tft'] = tft
-        res['response']['text'] = f'{translate(tft)}'
+        ttext = sessionStorage[user_id]["tft"]
+        res['response']['text'] = f'{translate(ttext)}'
 
 
 def translate(text):
@@ -87,8 +85,8 @@ def translate(text):
     }
 
     response = request.get(url, params)
-    logging.info(eval(response)['text'][0])
-    return eval(response)['text'][0]  # translated text
+    logging.info(response)
+    return response['text'][0]  # translated text
 
 
 def get_text(req):
@@ -97,6 +95,8 @@ def get_text(req):
         text.append(word)
     if len(text) == 3:
         return text[2]
+    else:
+        return None
 
 
 def get_first_name(req):
