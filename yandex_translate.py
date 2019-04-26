@@ -1,5 +1,6 @@
 from flask import Flask, request
 import logging
+import requests
 import json
 
 app = Flask(__name__)
@@ -92,13 +93,13 @@ def translate(text) -> "Перевод текста":
     params = {
         "key": "trnsl.1.1.20190416T140835Z.08c28d20c7acdc1f.0cd411bb3df4733f9798dcdb262b93f64b5f3225",
         "text": text,
-        "lang": "en",
+        "lang": "ru-en",
         "format": "plain"
     }
 
-    response = request.get(url, params)
+    response = requests.get(url, params=params)
     logging.info(response)
-    return response['text'][0]  # translated text
+    return response.json()['text'][0]  # translated text
 
 
 def get_text(req) -> "Получение текста для перевода":
