@@ -28,7 +28,11 @@ def main():
 
 
 def handle_dialog(res, req):
-    user_id = req['session']['user_id']
+    user_id = req['session']['user_id']  # Получаем ID пользователя
+
+    """""
+    Проверяем, если пользователь новый, то мы получаем его имя, проверяя с помощью сущностей API
+    """""
     if req['session']['new']:
         res['response']['text'] = 'Привет! Назови своё имя!'
         sessionStorage[user_id] = {
@@ -52,29 +56,37 @@ def handle_dialog(res, req):
             ]
             return
         else:
+            """"" 
+            Мы получили правильное имя пользователя, и просим его ввести слово для перевода в формате: \
+                "Переведи текст ..."
+            """""
             sessionStorage[user_id]['first_name'] = first_name
             res['response'][
                 'text'] = f'Приятно познакомиться, {first_name.title()}, шучу, мне плевать как тебя зовут.' \
                 f' Я буду называть тебя Жорик. Пиши сюда свой текст и я его переведу,' \
-                          ' а потом позвоню твоей маме и расскажу, что ты не учишь английский!!!'
+                ' а потом позвоню твоей маме и расскажу, что ты не учишь английский!!!'
             return
-    tft = get_text(req)
-    if tft is None:
-        res['response']['text'] = 'Не расслышала текст. Повтори, пожалуйста!'
-        res['response']['buttons'] = [
-            {
-                'title': 'Помощь',
-                'hide': True
-            }
-        ]
-        return
     else:
-        sessionStorage[user_id]['tft'] = tft
-        ttext = sessionStorage[user_id]["tft"]
-        res['response']['text'] = f'{translate(ttext)}'
+        if req['request']['original_utterance'].lower() == 'помощь':
+            res['response']['text'] = 'Бог тебе в помощь'
+            return
+        tft = get_text(req)
+        if tft is None:
+            res['response']['text'] = 'Не расслышала текст. Повтори, пожалуйста!'
+            res['response']['buttons'] = [
+                {
+                    'title': 'Помощь',
+                    'hide': True
+                }
+            ]
+            return
+        else:
+            sessionStorage[user_id]['tft'] = tft
+            ttext = sessionStorage[user_id]["tft"]
+            res['response']['text'] = f'{translate(ttext)}'
 
 
-def translate(text):
+def translate(text) -> "Перевод текста":
     url = "https://translate.yandex.net/api/v1.5/tr.json/translate"
 
     params = {
@@ -89,7 +101,7 @@ def translate(text):
     return response['text'][0]  # translated text
 
 
-def get_text(req):
+def get_text(req) -> "Получение текста для перевода":
     text = []
     for word in req['request']['nlu']['tokens']:
         text.append(word)
@@ -99,7 +111,7 @@ def get_text(req):
         return None
 
 
-def get_first_name(req):
+def get_first_name(req) -> "Получение имени пользователя":
     # перебираем сущности
     for entity in req['request']['nlu']['entities']:
         # находим сущность с типом 'YANDEX.FIO'
