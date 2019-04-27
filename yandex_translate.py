@@ -44,7 +44,7 @@ def handle_dialog(res, req):
 
     if sessionStorage[user_id]['first_name'] is None:
         if req['request']['original_utterance'].lower() == 'помощь':
-            res['response']['text'] = 'Бог тебе в помощь'
+            res['response']['text'] = 'Просто напиши мне своё имя'
             return
         first_name = get_first_name(req)
         if first_name is None:
@@ -63,13 +63,30 @@ def handle_dialog(res, req):
             """""
             sessionStorage[user_id]['first_name'] = first_name
             res['response'][
-                'text'] = f'Приятно познакомиться, {first_name.title()}, шучу, мне плевать как тебя зовут.' \
-                f' Я буду называть тебя Жорик. Пиши сюда свой текст и я его переведу,' \
-                ' а потом позвоню твоей маме и расскажу, что ты не учишь английский!!!'
+                'text'] = f'Приятно познакомиться, {first_name.title()}.' \
+                f' Пиши сюда свой текст и я его переведу.'
+            res['response']['buttons'] = [
+                {
+                    'title': 'Помощь',
+                    'hide': True
+                },
+                {
+                    'title': 'Что ты умеешь?',
+                    'hide': True
+                }
+            ]
             return
     else:
+
         if req['request']['original_utterance'].lower() == 'помощь':
-            res['response']['text'] = 'Бог тебе в помощь'
+            res['response']['text'] = 'Просто напиши мне "Переведи слово *ваше слово* и язык,' \
+                                      ' на котором хочешь перевести(es, en итд)'
+            return
+        if req['request']['original_utterance'].lower() == 'переведено сервисом яндекс.переводчик':
+            res['response']['text'] = 'Перехожу на официальный сайт Яндекс.Переводчика'
+            return
+        if req['request']['original_utterance'].lower() == 'что ты умеешь?':
+            res['response']['text'] = 'Я могу перевести любое слово на любой язык мира'
             return
         tft = get_text(req)
         if tft is None:
@@ -87,12 +104,26 @@ def handle_dialog(res, req):
                 ttext = sessionStorage[user_id]["tft"]
                 llang = "ru-en"
                 res['response']['text'] = f'{translate(ttext, llang)}'
+                res['response']['buttons'] = [
+                    {
+                        'title': 'Переведено сервисом Яндекс.Переводчик',
+                        'hide': True,
+                        'url': "http://translate.yandex.ru/"
+                    }]
+                return
             else:
                 sessionStorage[user_id]['tft'] = tft[0]
                 sessionStorage[user_id]['lang'] = tft[1]
                 ttext = sessionStorage[user_id]["tft"]
                 llang = sessionStorage[user_id]["lang"]
                 res['response']['text'] = f'{translate(ttext, llang)}'
+                res['response']['buttons'] = [
+                    {
+                        'title': 'Переведено сервисом Яндекс.Переводчик',
+                        'hide': True,
+                        'url': "http://translate.yandex.ru/"
+                    }]
+                return
 
 
 def translate(text, llang) -> "Перевод текста":
