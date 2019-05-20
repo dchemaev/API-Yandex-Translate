@@ -35,7 +35,9 @@ def handle_dialog(res, req):
     Проверяем, если пользователь новый, то мы получаем его имя, проверяя с помощью сущностей API
     """""
     if req['session']['new']:
-        res['response']['text'] = 'Привет! Назови своё имя!'
+        res['response'][
+            'text'] = 'Привет! Я переводчик слов, для начала назови мне своё имя,' \
+                      ' а после напиши мне "Переведи слово [Ваше слово] и язык(en, en итп)!'
         sessionStorage[user_id] = {
             'tft': None,
             'first_name': None
@@ -79,7 +81,7 @@ def handle_dialog(res, req):
     else:
 
         if req['request']['original_utterance'].lower() == 'помощь':
-            res['response']['text'] = 'Просто напиши мне "Переведи слово *ваше слово* и язык,' \
+            res['response']['text'] = 'Просто напиши мне "Переведи слово [Ваше слово] и язык,' \
                                       ' на котором хочешь перевести(es, en итд)'
             return
         if req['request']['original_utterance'].lower() == 'переведено сервисом яндекс.переводчик':
