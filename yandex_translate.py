@@ -48,12 +48,20 @@ def handle_dialog(res, req):
         if req['request']['original_utterance'].lower() == 'помощь':
             res['response']['text'] = 'Просто напиши мне своё имя'
             return
+        if req['request']['original_utterance'].lower() == 'что ты умеешь?':
+            res['response']['text'] = 'Я могу перевести любое слово на любой язык мира. Просто напиши мне ' \
+                                      '"Переведи слово [Ваше слово] и язык(en, en итп), но начала представься!'
+            return
         first_name = get_first_name(req)
         if first_name is None:
             res['response']['text'] = 'Не расслышала имя. Повтори, пожалуйста!'
             res['response']['buttons'] = [
                 {
                     'title': 'Помощь',
+                    'hide': True
+                },
+                {
+                    'title': 'Что ты умеешь?',
                     'hide': True
                 }
             ]
@@ -66,7 +74,8 @@ def handle_dialog(res, req):
             sessionStorage[user_id]['first_name'] = first_name
             res['response'][
                 'text'] = f'Приятно познакомиться, {first_name.title()}.' \
-                f' Пиши сюда свой текст и я его переведу.'
+                f' Пиши сюда свой текст и я его переведу. Просто напиши мне "Переведи слово [Ваше слово]' \
+                f' и язык(en, en итп)'
             res['response']['buttons'] = [
                 {
                     'title': 'Помощь',
@@ -88,7 +97,8 @@ def handle_dialog(res, req):
             res['response']['text'] = 'Перехожу на официальный сайт Яндекс.Переводчика'
             return
         if req['request']['original_utterance'].lower() == 'что ты умеешь?':
-            res['response']['text'] = 'Я могу перевести любое слово на любой язык мира'
+            res['response']['text'] = 'Я могу перевести любое слово на любой язык мира. Просто напиши мне ' \
+                                      '"Переведи слово [Ваше слово] и язык(en, en итп)'
             return
         tft = get_text(req)
         if tft is None:
